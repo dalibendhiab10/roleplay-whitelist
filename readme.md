@@ -64,8 +64,8 @@ In the `server.lua` file, update the `apiUrl` variable with the URL of your Disc
 local apiUrl = "http://localhost:9090/check-role/"
 
 -- Function to make an HTTP request to the bot's API
-local function makeApiRequest(playerSteamID)
-    local req = http.request(apiUrl .. playerSteamID, function(res)
+local function makeApiRequest(playerDiscordID)
+    local req = http.request(apiUrl .. playerDiscordID, function(res)
         local data = ""
         res.onData(function(chunk)
             data = data .. chunk
@@ -75,11 +75,11 @@ local function makeApiRequest(playerSteamID)
             local result = json.decode(data)
             if result and result.hasRole then
                 -- Player has the required role on the Discord server
-                print("Player with SteamID " .. playerSteamID .. " has the required role.")
+                print("Player with Discord ID " .. playerDiscordID .. " has the required role.")
                 -- Continue with your player connecting logic here (e.g., allow the player to join the game)
             else
                 -- Player does not have the required role on the Discord server
-                print("Player with SteamID " .. playerSteamID .. " does not have the required role.")
+                print("Player with disocrd ID " .. playerDiscordID .. " does not have the required role.")
                 -- Take appropriate actions for non-whitelisted players (e.g., kick or deny access)
             end
         end)
@@ -98,18 +98,18 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     local identifiers = GetPlayerIdentifiers(player)
     deferrals.defer()
     Wait(0)
-    deferrals.update("🚀 • Verifying your SteamID")
+    deferrals.update("🚀 • Verifying your discord ID")
     Wait(Config.Wait.steamId)
 
-    local steamID
+    local DiscordId
     for _, v in pairs(identifiers) do
-        if string.find(v, "steam") then
-            steamID = v
+        if string.find(v, "discord") then
+            DiscordId = v
             break
         end
     end
 
-    if not steamID then
+    if not DiscordId then
         deferrals.done("We could not find your SteamID. Please ensure that Steam is running.")
     end
 
@@ -117,7 +117,7 @@ AddEventHandler("playerConnecting", function(name, setKickReason, deferrals)
     Wait(Config.Wait.whitelist)
 
     -- Make the API request to check if the player has the required role
-    makeApiRequest(steamID)
+    makeApiRequest(DiscordId)
 
     -- Continue with the rest of your player connecting logic in the API request callback
 end)
